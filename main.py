@@ -10,11 +10,11 @@ import os
 
 feature_name = 'pitch_control' 
 # ['pitch_control', influence']
-game = 3
+game = 1
 # [1, 2, 3]
-model_name = 'base' 
+model_name = 'MIv2' 
 # ['base', 'MIv1', 'MIv2', 'MIv3', 'MIv4', 'same-0.5opp']
-aggr = 'mean'
+aggr = 'add'
 # ['mean', 'add', 'mul'] Note: MIv3 only supports 'mul' and 'mul' is only good for MIv3
 
 # load data
