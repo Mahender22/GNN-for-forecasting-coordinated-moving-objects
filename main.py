@@ -3,6 +3,8 @@ import data_processing
 from GCN_LSTM import GCN_LSTM_Model
 import torch
 import torch.nn as nn
+import pickle
+import os
 
 # setting parameters
 
@@ -10,7 +12,7 @@ feature = 'pitch_control'
 # ['pitch_control', influence']
 game = 3
 # [1, 2, 3]
-model = 'MIv2' 
+model_name = 'base' 
 # ['base', 'MIv1', 'MIv2', 'MIv3', 'MIv4', 'same-0.5opp']
 aggr = 'mean'
 # ['mean', 'add', 'mul'] Note: MIv3 only supports 'mul' and 'mul' is only good for MIv3
@@ -75,7 +77,9 @@ model = GCN_LSTM_Model(num_node_features=num_node_features,
                        lstm_hidden_size=lstm_hidden_size,
                        output_features=output_features,
                        num_nodes=num_nodes,
-                       n_steps_out=n_steps_out)
+                       n_steps_out=n_steps_out,
+                       model_name=model_name, 
+                       aggr=aggr) 
 
 # Determine the new training and validation sizes
 n_train_new = int(0.8 * len(X_train))  # 80% of the current training data for the new training set
@@ -151,3 +155,32 @@ with torch.no_grad():  # Turn off gradients for testing, saves memory and comput
     test_loss = criterion(test_outputs, y_test)
 
 print(f'Test Loss: {test_loss.item()}')
+
+model_parameters = {
+    'model': model_name,
+    'aggregation': aggr,
+    'game': game,
+    'y_true': y_test.detach().numpy(),
+    'y_pred': test_outputs.detach().numpy(),
+    'train_loss': train_losses,
+    'val_loss': val_losses
+    # 'residue_all_samples': residue_all_samples,
+    # 'mean_residue_per_player': mean_residue_per_player,
+    # 'average_residue_all_players': average_residue_all_players,
+    # 'median_residue_per_player': median_residue_per_player
+}
+
+save_dir = r'saved_'+str(feature)+'_results'
+
+# If the directory does not exist, create one
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
+
+# Specify the file name
+filename = save_dir+'\\'+str(model)+'_'+str(aggr)+'_'+str(game)+'.pkl'
+
+# Save the variables to a file
+with open(filename, 'wb') as file:
+    pickle.dump(model_parameters, file)
+
+print(f'Model parameters saved to {filename}')

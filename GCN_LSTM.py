@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
-from Custom_GCN import CustomGCNLayer  # Assuming this is defined in a separate file
+from Custom_GCN import CustomGCNLayer  
 
 class GCN_LSTM_Model(nn.Module):
-    def __init__(self, num_node_features, gcn_out_features, lstm_hidden_size, output_features, num_nodes, n_steps_out):
+    def __init__(self, num_node_features, gcn_out_features, lstm_hidden_size, output_features, 
+                 num_nodes, n_steps_out, model_name='base', aggr='add'):
         """
         Initialize the GCN-LSTM model.
 
@@ -14,9 +15,14 @@ class GCN_LSTM_Model(nn.Module):
             output_features (int): Number of output features.
             num_nodes (int): Number of nodes in the graph.
             n_steps_out (int): Number of output time steps.
+            model_name (str): The GCN model version ('base', 'MIv1', 'MIv2', 'MIv3', 'MIv4', 'same-0.5opp').
+            aggr (str): The aggregation method ('mean', 'add', 'mul'). Ignored for 'same-0.5opp'.
         """
         super(GCN_LSTM_Model, self).__init__()
-        self.gcn = CustomGCNLayer(num_node_features, gcn_out_features)
+
+        # Dynamically instantiate the GCN layer
+        self.gcn = CustomGCNLayer(num_node_features, gcn_out_features, version=model_name, aggr=aggr)
+
         self.lstm = nn.LSTM(input_size=gcn_out_features * num_nodes, hidden_size=lstm_hidden_size, 
                             batch_first=True, num_layers=2)
         self.tanh = nn.Tanh()
