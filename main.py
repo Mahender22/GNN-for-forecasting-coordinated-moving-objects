@@ -8,7 +8,7 @@ import os
 
 # setting parameters
 
-feature = 'pitch_control' 
+feature_name = 'pitch_control' 
 # ['pitch_control', influence']
 game = 3
 # [1, 2, 3]
@@ -25,9 +25,9 @@ data = data_processing.load_data(soccer_matrix_filename)
 pitch_control_data = data_processing.load_data(pitch_control)
 
 # process data
-if feature == 'pitch_control':
+if feature_name == 'pitch_control':
     X = data_processing.preprocess_data(data, pitch_control_data=pitch_control_data, feature='pitch_control')
-elif feature == 'influence':
+elif feature_name == 'influence':
     X = data_processing.preprocess_data(data, feature='influence')
 
 # In this data, the first dimension is time frame (seconds), second dimension is player (22 players in a soccer game), 
@@ -170,14 +170,14 @@ model_parameters = {
     # 'median_residue_per_player': median_residue_per_player
 }
 
-save_dir = r'saved_'+str(feature)+'_results'
+save_dir = r'saved_'+str(feature_name)+'_results'
 
 # If the directory does not exist, create one
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
 # Specify the file name
-filename = save_dir+'\\'+str(model)+'_'+str(aggr)+'_'+str(game)+'.pkl'
+filename = save_dir+'\\'+str(model_name)+'_'+str(aggr)+'_'+str(game)+'.pkl'
 
 # Save the variables to a file
 with open(filename, 'wb') as file:
