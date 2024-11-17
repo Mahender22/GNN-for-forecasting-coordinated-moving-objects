@@ -1,1 +1,3 @@
 __pycache__/
+.vscode/
+remove_unwanted_keys.py

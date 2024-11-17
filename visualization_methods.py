@@ -3,18 +3,28 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
-def calculate_residue(true_influences, predicted_influences):
+def calculate_residue(true_influences, predicted_influences, epsilon=1e-10):
     """
     Calculate the residue between true and predicted influences.
     
     Parameters:
         true_influences (np.ndarray): True influence values of shape [samples, players, time].
         predicted_influences (np.ndarray): Predicted influence values of the same shape.
+        epsilon (float): A small value to avoid division by zero.
     
     Returns:
         np.ndarray: Residue values of the same shape.
+    
+    Raises:
+        ValueError: If the shapes of true and predicted influences do not match.
     """
-    return np.abs(true_influences - predicted_influences)
+    if true_influences.shape != predicted_influences.shape:
+        raise ValueError("Shapes of true and predicted influences must match.")
+    
+    # Calculate the residue, adding epsilon to avoid division by zero
+    residue = np.abs(true_influences - predicted_influences) / (true_influences + epsilon)
+    
+    return residue
 
 def calculate_residue_metrics(residue_all_samples):
     """
@@ -101,7 +111,7 @@ def plot_median_residue_per_player(all_models_results, title="Median Residue per
     plt.xlabel('Player', fontsize=16)
     plt.ylabel('Median Residue', fontsize=16)
     plt.xticks(players, fontsize=12)
-    plt.yticks(np.arange(0, max_val + 0.1, 0.1), fontsize=12)
+    # plt.yticks(np.arange(0, max_val + 0.1, 0.1), fontsize=12)
     plt.title(title, fontsize=18)
     plt.legend(fontsize=12)
     plt.show()
