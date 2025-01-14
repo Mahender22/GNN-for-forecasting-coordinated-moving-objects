@@ -113,12 +113,7 @@ distance_threshold = 15        # or 'k3' for 3-nearest neighbors
 python main.py
 ```
 
-2. **Adversarial Training**:
-```bash
-python main_adversarial_model.py
-```
-
-3. **Visualization**:
+2. **Visualization**:
 ```bash
 python main_visualization.py
 ```
