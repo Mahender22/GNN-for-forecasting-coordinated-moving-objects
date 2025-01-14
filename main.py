@@ -16,6 +16,9 @@ model_name = 'base'
 # ['base', 'MIv1', 'MIv2', 'MIv3', 'MIv4', 'same-0.5opp']
 aggr = 'mean'
 # ['mean', 'add', 'mul'] Note: MIv3 only supports 'mul' and 'mul' is only good for MIv3
+distance_threshold = 15
+# any integer value in meters 
+# or k<n> where n is number of neighbors for example k3 implies knn with 3 neighbors 
 
 # load data
 soccer_matrix_filename = r'Processed_data\Coords_Influence_'+str(game)+'.npz'
@@ -32,9 +35,6 @@ elif feature_name == 'influence':
 
 # In this data, the first dimension is time frame (seconds), second dimension is player (22 players in a soccer game), 
 # third dimension has player feature (influence or pitch control), x coordinate and y coordinate in respective order
-
-# Create adjacency matrices for each time frame
-adj_matrices = data_processing.create_adjacency_matrices(X, distance_threshold=15)
 
 edge_indices, edge_distances = data_processing.create_edge_indices_and_distances(X, distance_threshold=15)
 
