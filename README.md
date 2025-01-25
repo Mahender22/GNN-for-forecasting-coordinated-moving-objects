@@ -31,6 +31,8 @@ The project includes a novel evolving graph dataset generator based on three 90-
 - `visualization_methods.py`: Visualization tools for model analysis.
 - `GCN_LSTM.py`: Combined GCN and LSTM model.
 - `Processed_data`: Directory for the processed game data for three 90 minute soccer games.
+- `data_preprocessing.py`: Data preprocessing pipeline for generating the dataset and preprocessing the data.
+- `Raw_data`: Directory for the raw tracking and event data for three 90 minute soccer games.
 
 ## Data Description
 
