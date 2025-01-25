@@ -51,6 +51,123 @@ The project uses two main types of data files:
 - Player dimension: 22 players (both teams)
 - Feature dimension: [influence/pitch_control, x_coordinate, y_coordinate]
 
+## Data Preprocessing
+
+### Raw Data Source
+The raw tracking and event data used in this project comes from [Metrica Sports' sample data repository](https://github.com/metrica-sports/sample-data). The dataset includes:
+
+- 3 complete soccer games with tracking data for all 22 players
+- Data format: CSV files for each game containing:
+  - Home team tracking data
+  - Away team tracking data
+  - Event data
+- Field dimensions: 105x68 meters
+- Coordinate system: (0,0) is top left, (1,1) is bottom right
+- Sampling rate: 25 frames per second
+
+### Data Processing Pipeline
+
+The project includes a comprehensive data preprocessing pipeline (`data_preprocessing.py`) that handles:
+
+1. **Data Loading and Cleaning**
+   ```python
+   # Game-specific data loading
+   data_h = pd.read_csv(home_data_path, skiprows=2)
+   data_a = pd.read_csv(away_data_path, skiprows=2)
+   ```
+
+2. **Player Tracking Data Processing**
+   - Handles player substitutions
+   - Normalizes coordinates to field dimensions
+   - Manages missing data
+   - Game-specific coordinate transformations
+
+3. **Feature Calculation**
+   - **Influence Values**: Calculated using k-nearest neighbors approach
+     ```python
+     # Calculate player influence using KNN
+     random_points = np.random.uniform(low=[0, 0], high=[105, 68], size=(10000, 2))
+     knn = NearestNeighbors(n_neighbors=1)
+     ```
+   - **Pitch Control**: Computed using Gaussian kernel
+     ```python
+     # Calculate control values using Gaussian kernel
+     control_values = np.exp(-distances**2 / (2 * sigma**2))
+     ```
+
+4. **Game-Specific Handling**
+   - Game 1: Standard processing
+   - Game 2: Special handling for player substitutions and coordinate flipping
+   - Game 3: EPTS FIFA format handling
+
+### Data Structure
+
+#### Input Data
+```
+Raw_data/
+    Sample_game_1/
+        Sample_game_1_RawTrackingData_Home_Team.csv
+        Sample_game_1_RawTrackingData_Away_Team.csv
+        Sample_game_1_RawEventsData.csv
+    Sample_game_2/
+        ...
+    Sample_game_3/
+        ...
+```
+
+#### Processed Output
+```
+Processed_data/
+    Coords_Influence_1.npz      # Player influence values
+    pitch_control_1.npz         # Pitch control values
+    processed_coordinates_1.csv  # Cleaned tracking data
+    ...
+```
+
+#### Data Format
+1. **Influence Values Array**: Shape (frames, 22)
+   - Each frame contains influence values for all 22 players
+   - Values normalized to [0,1] range
+
+2. **Pitch Control Array**: Shape (frames, 22)
+   - Each frame contains pitch control values for all 22 players
+   - Values represent spatial control of the field
+
+3. **Processed Coordinates**: 
+   - Player positions in absolute coordinates (meters)
+   - Synchronized with influence and pitch control values
+
+### Running the Preprocessing
+
+1. Install required packages:
+```bash
+pip install numpy pandas scipy scikit-learn tqdm matplotlib
+```
+
+2. Run the preprocessing script:
+```bash
+python data_preprocessing.py
+```
+
+3. Monitor progress:
+   - Script provides progress bars for each processing step
+   - Logs warnings and errors for data quality issues
+   - Reports successful completion for each game
+
+### Data Validation
+
+The preprocessing pipeline includes several validation steps:
+- Column consistency checks
+- Missing data detection
+- Coordinate range validation
+- Frame synchronization verification
+
+### Notes
+- Coordinate system is converted from normalized [0,1] to actual field dimensions (105x68 meters)
+- Missing data is handled through substitution tracking
+- Game 2 includes special handling for second-half coordinate flipping
+- All processed data is synchronized across different features
+
 ## Model Details
 
 ### Base GCN-LSTM Architecture
