@@ -17,6 +17,18 @@ from sklearn.calibration import calibration_curve
 import matplotlib.patches as patches
 import os
 from sklearn.neighbors import NearestNeighbors
+import argparse
+
+def parse_arguments():
+    """
+    Parse command line arguments
+    """
+    parser = argparse.ArgumentParser(description='Process soccer game data')
+    parser.add_argument('feature_type', type=str, choices=['influence', 'pitch_control'],
+                      help='Type of feature to calculate')
+    parser.add_argument('game_number', type=int, choices=[1, 2, 3],
+                      help='Game number to process (1-3)')
+    return parser.parse_args()
 
 def data_cleaning(data):
     """
@@ -244,55 +256,58 @@ def calculate_pitch_control(data, sigma=0.5, lambda_=4.3):
 
     return np.array(pitch_control_data)
 
+def process_feature(feature_type, game_number):
+    """
+    Process specific feature for a given game
+    """
+    print(f"\nProcessing game {game_number} for {feature_type}...")
+    
+    try:
+        # Process game data
+        game_data = process_game_data(game_number)
+        if game_data is None:
+            print(f"Skipping game {game_number} due to data mismatch")
+            return
+        
+        # Calculate specified feature
+        if feature_type == 'influence':
+            print("Calculating influence values...")
+            feature_values = calculate_influence(game_data)
+            output_filename = f"Coords_Influence_{game_number}.npz"
+        else:  # pitch_control
+            print("Calculating pitch control values...")
+            feature_values = calculate_pitch_control(game_data)
+            output_filename = f"pitch_control_{game_number}.npz"
+        
+        # Save processed data
+        output_path = "Processed_data"
+        os.makedirs(output_path, exist_ok=True)
+        
+        # Save feature values
+        print(f"Saving {feature_type} values...")
+        np.savez_compressed(
+            f"{output_path}/{output_filename}",
+            data=feature_values
+        )
+        
+        # Save coordinates
+        print("Saving processed coordinates...")
+        game_data.to_csv(f"{output_path}/processed_coordinates_{game_number}.csv")
+        
+        print(f"Successfully completed processing {feature_type} for game {game_number}")
+        
+    except Exception as e:
+        print(f"Error processing game {game_number}: {str(e)}")
+
 def main():
     """
-    Main function to process all games and save results
+    Main function to process specified feature and game
     """
-    for game_number in range(1, 4):
-        print(f"\nProcessing game {game_number}...")
-        
-        try:
-            # Process game data
-            game_data = process_game_data(game_number)
-            if game_data is None:
-                print(f"Skipping game {game_number} due to data mismatch")
-                continue
-            
-            # Calculate influence values
-            print("Calculating influence values...")
-            influence_values = calculate_influence(game_data)
-            
-            # Calculate pitch control values
-            print("Calculating pitch control values...")
-            pitch_control_values = calculate_pitch_control(game_data)
-            
-            # Save processed data
-            output_path = "Processed_data"
-            os.makedirs(output_path, exist_ok=True)
-            
-            # Save influence values
-            print("Saving influence values...")
-            np.savez_compressed(
-                f"{output_path}/Coords_Influence_{game_number}.npz",
-                data=influence_values
-            )
-            
-            # Save pitch control values
-            print("Saving pitch control values...")
-            np.savez_compressed(
-                f"{output_path}/pitch_control_{game_number}.npz",
-                data=pitch_control_values
-            )
-            
-            # Save coordinates
-            print("Saving processed coordinates...")
-            game_data.to_csv(f"{output_path}/processed_coordinates_{game_number}.csv")
-            
-            print(f"Successfully completed processing game {game_number}")
-            
-        except Exception as e:
-            print(f"Error processing game {game_number}: {str(e)}")
-            continue
+    # Parse command line arguments
+    args = parse_arguments()
+    
+    # Process the specified feature and game
+    process_feature(args.feature_type, args.game_number)
 
 if __name__ == "__main__":
     main() 

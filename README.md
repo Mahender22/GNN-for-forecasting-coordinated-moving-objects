@@ -146,15 +146,27 @@ Processed_data/
 pip install numpy pandas scipy scikit-learn tqdm matplotlib
 ```
 
-2. Run the preprocessing script:
+2. Run the preprocessing script with arguments:
 ```bash
-python data_preprocessing.py
+# For influence values:
+python data_preprocessing.py influence 1  # Process influence for game 1
+python data_preprocessing.py influence 2  # Process influence for game 2
+python data_preprocessing.py influence 3  # Process influence for game 3
+
+# For pitch control values:
+python data_preprocessing.py pitch_control 1  # Process pitch control for game 1
+python data_preprocessing.py pitch_control 2  # Process pitch control for game 2
+python data_preprocessing.py pitch_control 3  # Process pitch control for game 3
 ```
+
+The script accepts two required arguments:
+- `feature_type`: Type of feature to calculate ['influence', 'pitch_control']
+- `game_number`: Game number to process [1, 2, 3]
 
 3. Monitor progress:
    - Script provides progress bars for each processing step
    - Logs warnings and errors for data quality issues
-   - Reports successful completion for each game
+   - Reports successful completion for each feature/game combination
 
 ### Data Validation
 
@@ -164,11 +176,27 @@ The preprocessing pipeline includes several validation steps:
 - Coordinate range validation
 - Frame synchronization verification
 
+### Game-Specific Processing
+
+1. **Game 1**:
+   - Standard processing
+   - Basic column drops for substitutes and ball data
+
+2. **Game 2**:
+   - Special handling for player 22 substitution
+   - Coordinate flipping for second half
+   - Custom column handling
+
+3. **Game 3**:
+   - EPTS FIFA format handling
+   - Specific transformations for coordinate system
+
 ### Notes
 - Coordinate system is converted from normalized [0,1] to actual field dimensions (105x68 meters)
 - Missing data is handled through substitution tracking
 - Game 2 includes special handling for second-half coordinate flipping
 - All processed data is synchronized across different features
+- Each feature is processed independently for better memory management
 
 ## Model Details
 
